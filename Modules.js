@@ -1,9 +1,9 @@
 // Importing values from the local file "Data.js"
 // Using object destructuring to extract 'names' and 'age'
-const { names, age } = require('../Data');
+const { names, age } = require('./Data');
 
 // Other Way
-const imports = require('../Data');
+const imports = require('./Data');
 
 //Logging the imported values with imports.variableName
 console.log(imports.age);
