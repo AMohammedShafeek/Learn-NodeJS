@@ -9,6 +9,20 @@ app.listen(3000, () => {
     console.log('Server running on http://localhost:3000')
 })
 
+//Used For Logger
+app.use((req, res, next) => {
+    console.log('Request Received');
+    console.log(req.host);
+    console.log(req.path);
+    console.log(req.method);
+    next()
+})
+
+app.use((req, res, next) => {
+    console.log('2nd Middleware Testing...');
+    next()
+})
+
 // Route: GET /
 // sendFile() is used to send static HTML files
 // __dirname gives the current directory path
