@@ -93,12 +93,29 @@ app.get('/api/products/:id', (req, res) => {
 //covert data to json formal
 app.use(express.json())
 
-// Insert new user using POST
+// Insert new user using POST request
 app.post('/api/users', (req, res)=>{
     const {body} = req
     const newUser = {id: users[users.length-1].id+1, ...body}
     users.push(newUser)
     res.status(201).send(newUser)
+})
+
+//Update User using PUT Request
+app.put('/api/users/:id', (req, res)=>{
+    const id = parseInt(req.params.id)
+    if (isNaN(id)) {
+        return res.status(400).send({ msg: "Bad Request. Invalid ID" })
+    }
+    const userIndex = users.findIndex((user) =>
+        (user.id === id)
+    )
+    if (userIndex === -1) {
+        return res.status(404).send({ msg: "User Not Found" })
+    }
+    const {body} = req
+    users[userIndex] = {id: id, ...body}
+    return res.status(200).send({msg: "User Upated"})
 })
 
 app.listen(PORT, () => {
