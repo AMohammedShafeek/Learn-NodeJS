@@ -36,6 +36,30 @@ const products = [
     },
 ]
 
+const getUserIndexByID = (req, res, next) => {
+    const id = parseInt(req.params.id)
+    if (isNaN(id)) {
+        return res.status(400).send({ msg: "Bad Request. Invalid ID" })
+    }
+    const userIndex = users.findIndex((user) =>
+        (user.id === id)
+    )
+    if (userIndex === -1) {
+        return res.status(404).send({ msg: "User Not Found" })
+    }
+    req.userIndex = userIndex
+    next()
+}
+
+const getParamsId = (req, res, next) =>{
+    const id = parseInt(req.params.id)
+    if (isNaN(id)) {
+        return res.status(400).send({ msg: "Bad Request. Invalid ID" })
+    }
+    req.id = id
+    next()
+}
+
 app.get('/', (req, res) => {
     res.send({ msg: "Root" })
 })
@@ -61,11 +85,8 @@ app.get('/api/products', (req, res) => {
 
 // Route Params
 //users endpoint
-app.get('/api/users/:id', (req, res) => {
-    const id = parseInt(req.params.id)
-    if (isNaN(id)) {
-        return res.status(400).send({ msg: "Bad Request. Invalid ID" })
-    }
+app.get('/api/users/:id', getParamsId, (req, res) => {
+    const {id} = req
     const user = users.find((user) =>
         (user.id === id)
     )
@@ -76,11 +97,8 @@ app.get('/api/users/:id', (req, res) => {
 })
 
 //product endpoint
-app.get('/api/products/:id', (req, res) => {
-    const id = parseInt(req.params.id)
-    if (isNaN(id)) {
-        return res.status(400).send({ msg: "Bad Request. Invalid ID" })
-    }
+app.get('/api/products/:id', getParamsId, (req, res) => {
+    const {id} = req
     const product = products.find((product) =>
         (product.id === id)
     )
@@ -102,51 +120,22 @@ app.post('/api/users', (req, res)=>{
 })
 
 //Update User using PUT Request
-app.put('/api/users/:id', (req, res)=>{
-    const id = parseInt(req.params.id)
-    if (isNaN(id)) {
-        return res.status(400).send({ msg: "Bad Request. Invalid ID" })
-    }
-    const userIndex = users.findIndex((user) =>
-        (user.id === id)
-    )
-    if (userIndex === -1) {
-        return res.status(404).send({ msg: "User Not Found" })
-    }
-    const {body} = req
+app.put('/api/users/:id', getUserIndexByID, (req, res)=>{
+    const {userIndex, body} = req
     users[userIndex] = {id: id, ...body}
     return res.status(200).send({msg: "User Upated"})
 })
 
 //Update User using PATCH Request
-app.patch('/api/users/:id', (req, res)=>{
-    const id = parseInt(req.params.id)
-    if (isNaN(id)) {
-        return res.status(400).send({ msg: "Bad Request. Invalid ID" })
-    }
-    const userIndex = users.findIndex((user) =>
-        (user.id === id)
-    )
-    if (userIndex === -1) {
-        return res.status(404).send({ msg: "User Not Found" })
-    }
-    const {body} = req
+app.patch('/api/users/:id', getUserIndexByID, (req, res)=>{
+    const {userIndex, body} = req
     users[userIndex] = {...users[userIndex], ...body}
     return res.status(200).send({msg: "User Upated"})
 })
 
 //Delete User using DELETE Request
-app.delete('/api/users/:id', (req, res)=>{
-    const id = parseInt(req.params.id)
-    if (isNaN(id)) {
-        return res.status(400).send({ msg: "Bad Request. Invalid ID" })
-    }
-    const userIndex = users.findIndex((user) =>
-        (user.id === id)
-    )
-    if (userIndex === -1) {
-        return res.status(404).send({ msg: "User Not Found" })
-    }
+app.delete('/api/users/:id', getUserIndexByID, (req, res)=>{
+    const {userIndex} = req
     users.splice(userIndex, 1)
     return res.status(200).send({msg: "User Deleted"})
 })
