@@ -1,4 +1,6 @@
 import express from 'express'
+import { createUserValidationSchema } from '../Scripts/utils/validationSchemas.mjs'
+import { validationResult, matchData, checkSchema } from 'express-validator'
 
 const app = express()
 
@@ -112,8 +114,14 @@ app.get('/api/products/:id', getParamsId, (req, res) => {
 app.use(express.json())
 
 // Insert new user using POST request
-app.post('/api/users', (req, res)=>{
-    const {body} = req
+app.post('/api/users', checkSchema(createUserValidationSchema), (req, res)=>{
+    const result = validationResult(req)
+
+    if(!result.isEmpty()){
+        return res.status(400).send({error: result.array()})
+    }
+
+    const body = matchData(req)
     const newUser = {id: users[users.length-1].id+1, ...body}
     users.push(newUser)
     res.status(201).send(newUser)
