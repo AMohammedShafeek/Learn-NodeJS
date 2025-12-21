@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { getParamsId, getUserIndexByID } from '../utils/middlewares'
+import { getParamsId, getUserIndexByID } from '../utils/middlewares.mjs'
 import { users } from "../utils/dataConsts.mjs";
 import { createUserValidationSchema } from '../utils/validationSchemas.mjs'
-import { validationResult, matchData, checkSchema } from 'express-validator'
+import { validationResult, matchedData, checkSchema } from 'express-validator'
 
 const router = Router()
 
@@ -35,7 +35,7 @@ router.post('/api/users', checkSchema(createUserValidationSchema), (req, res)=>{
         return res.status(400).send({error: result.array()})
     }
 
-    const body = matchData(req)
+    const body = matchedData(req)
     const newUser = {id: users[users.length-1].id+1, ...body}
     users.push(newUser)
     res.status(201).send(newUser)

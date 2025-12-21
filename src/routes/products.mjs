@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getParamsId } from '../utils/middlewares'
+import { getParamsId } from '../utils/middlewares.mjs'
 import { products } from "../utils/dataConsts.mjs";
 
 const router = Router()
