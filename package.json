@@ -20,6 +20,7 @@
     "start": "node ./src/index.mjs"
   },
   "dependencies": {
+    "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
     "express-validator": "^7.3.1",
     "lodash": "^4.17.21",
