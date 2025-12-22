@@ -6,11 +6,14 @@ const router = Router()
 
 //products
 router.get('/api/products', (req, res) => {
+    req.session.visited = true
+    console.log(req.session.id);
+    
     const {query:{filter, value}} = req
     if(filter && value){
         return res.send(products.filter(((product)=>product[filter].toLowerCase().includes(value.toLowerCase()))))
     }
-    res.send({msg: 'Product Not Found'})
+    res.send(products)
 })
 
 //product endpoint
