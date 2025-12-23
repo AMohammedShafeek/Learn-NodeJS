@@ -4,7 +4,8 @@ import cookieParser from 'cookie-parser'
 import session from 'express-session'
 import { Strategy as LocalStrategy } from 'passport-local'
 import passport from 'passport'
-import { users } from './utils/dataConsts.mjs'
+import mongoose from 'mongoose'
+import { User } from './mongoose/schema/user.mjs'
 
 const app = express()
 
@@ -12,6 +13,14 @@ const app = express()
 app.use(express.json())
 
 app.use(cookieParser("{Ben} % {Ten} & {Alien} * {Force}"))
+
+mongoose.connect('mongodb://localhost/express')
+    .then(() => {
+        console.log('Database Connected');
+    })
+    .catch((err) => {
+        console.log(`Error Found: ${err}`);
+    })
 
 app.use(session({
     secret: '<Ben> $ <Ten> ! <Ultimate> ^ <Force>',
@@ -26,25 +35,37 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 passport.use(new LocalStrategy(
-    {usernameField: 'user_name', passwordField: 'password'}, 
-    (user_name, password, done) => {
-    const user = users.find((user) => (user.user_name == user_name))
-    if (!user) {
-        return done(null, false, { message: 'Invalid Username' })
-    }
-    if (user.password !== password) {
-        return done(null, false, { message: 'Incorrect Password' })
-    }
-    return done(null, user)
-}))
+    { usernameField: 'user_name', passwordField: 'password' },
+    async (user_name, password, done) => {
+        try {
+            const user = await User.findOne({ user_name: user_name })
+            if (!user) {
+                return done(null, false, { message: 'Invalid Username' })
+            }
+            if (user.password !== password) {
+                return done(null, false, { message: 'Incorrect Password' })
+            }
+            return done(null, user)
+        }
+        catch (err) {
+            console.log(err);
+            return done(err, false)
+        }
+    }))
 
 passport.serializeUser((user, done) => {
     done(null, user.id)
-}) 
+})
 
-passport.deserializeUser((id, done) => {
-    const user = users.find((u) => (u.id === id))
-    done(null, user || false)
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id)
+        done(null, user)
+    }
+    catch(err){
+        console.log(err);
+        done(err, false)
+    }
 })
 
 app.use(router)
@@ -79,7 +100,7 @@ app.post('/login', (req, res, next) => {
             if (err) {
                 return next(err)
             }
-            return res.json({msg: 'Login Successful', user})
+            return res.json({ msg: 'Login Successful', user })
         })
     })(req, res, next)
 })

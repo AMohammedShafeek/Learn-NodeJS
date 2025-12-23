@@ -9,12 +9,12 @@ export const createUserValidationSchema = {
         },
         
     },
-    age: {
+    password: {
         notEmpty: {
-            errorMessage: "Age is Required"
+            errorMessage: "Password Required"
         },
-        isString: {
-            errorMessage: "Age Must be in Numbers"
-        }
+        // isString: {
+        //     errorMessage: "Age Must be in Numbers"
+        // }
     }
 }

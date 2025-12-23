@@ -3,6 +3,7 @@ import { getParamsId, getUserIndexByID } from '../utils/middlewares.mjs'
 import { users } from "../utils/dataConsts.mjs";
 import { createUserValidationSchema } from '../utils/validationSchemas.mjs'
 import { validationResult, matchedData, checkSchema } from 'express-validator'
+import {User} from '../mongoose/schema/user.mjs'
 
 const router = Router()
 
@@ -16,8 +17,8 @@ router.get('/api/users', (req, res) => {
         }
         return res.send(users)
     }
-    else{
-        res.send({msg: "You don't have a Access"})
+    else {
+        res.send({ msg: "You don't have a Access" })
     }
 })
 
@@ -35,7 +36,7 @@ router.get('/api/users/:id', getParamsId, (req, res) => {
 })
 
 // Insert new user using POST request
-router.post('/api/users', checkSchema(createUserValidationSchema), (req, res) => {
+router.post('/api/users', checkSchema(createUserValidationSchema), async (req, res) => {
     const result = validationResult(req)
 
     if (!result.isEmpty()) {
@@ -43,9 +44,15 @@ router.post('/api/users', checkSchema(createUserValidationSchema), (req, res) =>
     }
 
     const body = matchedData(req)
-    const newUser = { id: users[users.length - 1].id + 1, ...body }
-    users.push(newUser)
-    res.status(201).send(newUser)
+    const newUser = new User(body)
+    try {
+        const savedUser = await newUser.save()
+        res.status(201).send(savedUser)
+    }
+    catch(err){
+        console.log(err);
+        return res.status(400).send({msg: 'User Not Saved'})
+    }
 })
 
 //Update User using PUT Request
