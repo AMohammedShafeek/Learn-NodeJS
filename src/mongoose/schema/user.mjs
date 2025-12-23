@@ -9,9 +9,18 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: mongoose.Schema.Types.String,
-        required: true,
 
-    }
+    },
+    googleId: {
+        type: mongoose.Schema.Types.String,
+        unique: true,
+        sparse: true
+    },
+    email: {
+        type: mongoose.Schema.Types.String,
+        unique: true,
+        sparse: true,
+    },
 })
 
 export const User = mongoose.model('User', userSchema)

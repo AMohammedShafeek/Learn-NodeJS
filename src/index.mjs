@@ -7,6 +7,7 @@ import passport from 'passport'
 import mongoose from 'mongoose'
 import { User } from './mongoose/schema/user.mjs'
 import { comparePassword } from './utils/helper.mjs'
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 
 const app = express()
 
@@ -54,6 +55,34 @@ passport.use(new LocalStrategy(
         }
     }))
 
+const GoogleClientID = 'enterClientID'
+const GoogleClientSecret = 'enterClientSecretCode'
+
+passport.use(new GoogleStrategy({
+    clientID: GoogleClientID,
+    clientSecret: GoogleClientSecret,
+    callbackURL: "/auth/google/cb"
+},
+    async function (accessToken, refreshToken, profile, done) {
+        try {
+            const user = await User.findOne({ googleId: profile.id })
+            if (user) {
+                return done(null, user)
+            }
+            const email = profile.emails?.[0].value
+            const newUser = await User.create({
+                user_name: profile.displayName,
+                googleId: profile.id,
+                email
+            })
+            return done(null, newUser)
+        }
+        catch (err) {
+            return done(err, null)
+        }
+    }
+));
+
 passport.serializeUser((user, done) => {
     done(null, user.id)
 })
@@ -63,7 +92,7 @@ passport.deserializeUser(async (id, done) => {
         const user = await User.findById(id)
         done(null, user)
     }
-    catch(err){
+    catch (err) {
         console.log(err);
         done(err, false)
     }
@@ -105,6 +134,22 @@ app.post('/login', (req, res, next) => {
         })
     })(req, res, next)
 })
+
+app.get('/auth/google', passport.authenticate('google',
+    {
+        scope: ['profile', 'email']
+    }
+))
+
+app.get('/auth/google/cb', passport.authenticate('google',
+    {
+        failureRedirect: '/'
+    }
+),
+    (req, res) => {
+        res.send({ msg: 'Google Login Successful', user: req.user })
+    }
+)
 
 app.listen(PORT, () => {
     console.log(`App is Running on PORT: ${PORT}`);
